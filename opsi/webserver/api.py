@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI, File, UploadFile
 from starlette.responses import JSONResponse
+from starlette.middleware.gzip import GZipMiddleware
 
 import opsi
 from opsi.backend.network import dhcpcd_writable, set_network_mode
@@ -35,6 +36,7 @@ class Api:
         self.app.post("/restart-host")(self.restart_host)
         self.app.post("/profile")(self.profile)
         self.app.post("/network")(self.network)
+        self.app.add_middleware(GZipMiddleware)
 
         parent_app.mount(prefix, self.app)
 
