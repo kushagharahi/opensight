@@ -101,11 +101,11 @@ class MjpegResponse:
                 if app.end or sink.end:
                     return
 
-                if not sink.pendingFrame:
+                frame = sink.frame
+                if not frame:
                     await asyncio.sleep(0.01)
                     continue
 
-                frame = sink.frame
                 res = params.resolution
                 if res:
                     frame = frame.resize(res)
@@ -122,7 +122,6 @@ class MjpegResponse:
 
 class Sink:
     def __init__(self):
-        self.pendingFrame = False
         self.lastTime = datetime.now()
         self.end = False
 
@@ -130,13 +129,14 @@ class Sink:
 
     @property
     def frame(self):
+        frame = self._frame
+        self._frame = None
         self.lastTime = datetime.now()
-        return self._frame
+        return frame
 
     @frame.setter
     def frame(self, frame):
         self._frame = frame
-        self.pendingFrame = True
 
     def next_frame_time(self, fps):
         return (
